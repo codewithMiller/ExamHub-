@@ -1,0 +1,117 @@
+{% extends 'exam/base.html' %}
+{% load exam_filters %}
+{% block title %}{{ exam.title }}{% endblock %}
+{% block content %}
+<div class="container fadein" style="max-width:700px;">
+  <!-- Exam Header -->
+  <div class="card" style="border-color:var(--accent); margin-bottom:2rem; background: linear-gradient(135deg, rgba(240,192,64,0.08) 0%, var(--surface) 100%);">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 style="font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; margin-bottom:0.25rem;">{{ exam.title }}</h1>
+        {% if exam.description %}<p class="text-muted text-sm">{{ exam.description }}</p>{% endif %}
+      </div>
+      <div style="text-align:center; flex-shrink:0; margin-left:1rem;">
+        <div style="font-family:'DM Mono', monospace; font-size:1.8rem; font-weight:600; color:var(--accent);" id="timer">{{ exam.duration_minutes }}:00</div>
+        <div class="text-muted text-sm">remaining</div>
+      </div>
+    </div>
+    <hr>
+    <div class="flex gap-3">
+      <span class="badge badge-yellow">{{ questions.count }} Questions</span>
+      <span class="badge badge-gray">⏱ {{ exam.duration_minutes }} minutes</span>
+    </div>
+  </div>
+
+  <form method="post" id="examForm">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>Your Name</label>
+      <input type="text" name="student_name" placeholder="Enter your name (optional)">
+    </div>
+    <hr>
+
+    {% for q in questions %}
+    <div class="card" style="margin-bottom:1rem;" id="qcard_{{ forloop.counter }}">
+      <div class="flex items-center gap-2" style="margin-bottom:0.9rem;">
+        <span class="badge badge-yellow mono">Q{{ forloop.counter }}</span>
+        <p style="font-size:1rem; font-weight:500; line-height:1.5;">{{ q.text }}</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+        {% for key, label in q|options_list %}
+        <label class="option-label" for="opt_{{ q.id }}_{{ key }}">
+          <input type="radio" name="q_{{ q.id }}" id="opt_{{ q.id }}_{{ key }}" value="{{ key }}">
+          <span class="option-key mono">{{ key }}</span>
+          <span class="option-text">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <div style="margin-top:2rem; text-align:center;">
+      <button type="submit" class="btn btn-primary" style="padding:0.8rem 2.5rem; font-size:1rem;" onclick="return confirm('Submit exam? You cannot change your answers after this.')">
+        📤 Submit Exam
+      </button>
+    </div>
+  </form>
+</div>
+
+<style>
+  .option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface2);
+  }
+  .option-label:hover { border-color: var(--accent); background: rgba(240,192,64,0.05); }
+  .option-label input[type=radio] { display: none; }
+  .option-label:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(240,192,64,0.1);
+    color: var(--accent);
+  }
+  .option-key {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .option-label:has(input:checked) .option-key { background: var(--accent); color: #111; }
+</style>
+
+<script>
+  // Countdown timer
+  let totalSeconds = {{ exam.duration_minutes }} * 60;
+  const timerEl = document.getElementById('timer');
+
+  function updateTimer() {
+    if (totalSeconds <= 0) {
+      timerEl.textContent = '0:00';
+      timerEl.style.color = 'var(--danger)';
+      alert('⏰ Time is up! Submitting your exam now.');
+      document.getElementById('examForm').submit();
+      return;
+    }
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    timerEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    if (totalSeconds <= 60) timerEl.style.color = 'var(--danger)';
+    else if (totalSeconds <= 300) timerEl.style.color = '#f09040';
+    totalSeconds--;
+  }
+  updateTimer();
+  setInterval(updateTimer, 1000);
+</script>
+{% endblock %}

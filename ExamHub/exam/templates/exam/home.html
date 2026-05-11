@@ -1,0 +1,40 @@
+{% extends 'exam/base.html' %}
+{% block title %}MillerExamHub — Available Exams{% endblock %}
+{% block content %}
+<div class="container fadein">
+  <div class="page-header">
+    <h1>📋 Available Exams</h1>
+    <p>Select an exam to begin. Good luck!</p>
+  </div>
+
+  {% if exams %}
+    {% for exam in exams %}
+    <div class="card card-hover">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-2" style="margin-bottom:0.4rem;">
+            <h2 style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.15rem;">{{ exam.title }}</h2>
+            <span class="badge badge-yellow">{{ exam.question_count }} Qs</span>
+            <span class="badge badge-gray">⏱ {{ exam.duration_minutes }}min</span>
+          </div>
+          {% if exam.description %}
+            <p class="text-muted text-sm">{{ exam.description }}</p>
+          {% endif %}
+        </div>
+        <div class="flex gap-2" style="flex-shrink:0; margin-left:1rem;">
+          <a href="{% url 'take_exam' exam.id %}" class="btn btn-primary">Start →</a>
+          <a href="{% url 'leaderboard' exam.id %}" class="btn btn-ghost btn-sm">🏆 Board</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="card" style="text-align:center; padding:3rem 1.5rem;">
+      <div style="font-size:3rem; margin-bottom:1rem;">📭</div>
+      <h3 style="font-family:'Syne',sans-serif; margin-bottom:0.5rem;">No exams yet</h3>
+      <p class="text-muted" style="margin-bottom:1.5rem;">Create your first exam to get started.</p>
+      <a href="{% url 'create_exam' %}" class="btn btn-primary">+ Create Exam</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

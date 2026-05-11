@@ -1,0 +1,44 @@
+{% extends 'exam/base.html' %}
+{% block title %}Manage Exams{% endblock %}
+{% block content %}
+<div class="container fadein">
+  <div class="flex items-center justify-between" style="margin-bottom:2rem;">
+    <div class="page-header" style="margin-bottom:0;">
+      <h1>⚙️ Manage Exams</h1>
+      <p>Create, edit, or delete your exams.</p>
+    </div>
+    <a href="{% url 'create_exam' %}" class="btn btn-primary">+ New Exam</a>
+  </div>
+
+  {% if exams %}
+    {% for exam in exams %}
+    <div class="card">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-2" style="margin-bottom:0.35rem;">
+            <h3 style="font-family:'Syne',sans-serif; font-weight:700;">{{ exam.title }}</h3>
+            <span class="badge {% if exam.is_active %}badge-green{% else %}badge-gray{% endif %}">
+              {% if exam.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+            <span class="badge badge-yellow">{{ exam.question_count }} Qs</span>
+          </div>
+          <p class="text-muted text-sm mono">⏱ {{ exam.duration_minutes }}min &nbsp;·&nbsp; Created {{ exam.created_at|date:"M d, Y" }}</p>
+        </div>
+        <div class="flex gap-2" style="flex-shrink:0; margin-left:1rem;">
+          <a href="{% url 'add_question' exam.id %}" class="btn btn-ghost btn-sm">Edit Qs</a>
+          <a href="{% url 'leaderboard' exam.id %}" class="btn btn-ghost btn-sm">🏆</a>
+          <form method="post" action="{% url 'delete_exam' exam.id %}" onsubmit="return confirm('Delete this exam and all its data?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="card" style="text-align:center; padding:3rem;">
+      <p class="text-muted">No exams yet. <a href="{% url 'create_exam' %}" style="color:var(--accent);">Create one →</a></p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

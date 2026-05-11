@@ -1,0 +1,100 @@
+{% extends 'exam/base.html' %}
+{% load exam_filters %}
+{% block title %}Add Questions — {{ exam.title }}{% endblock %}
+{% block content %}
+<div class="container-wide fadein">
+  <div class="flex items-center justify-between" style="margin-bottom:1.5rem;">
+    <div>
+      <h1 style="font-family:'Syne',sans-serif; font-weight:800; font-size:1.6rem;">{{ exam.title }}</h1>
+      <p class="text-muted text-sm">Add as many questions as you need.</p>
+    </div>
+    <div class="flex gap-2">
+      <span class="badge badge-yellow" style="font-size:0.85rem; padding:0.4rem 0.8rem;">{{ questions.count }} question{{ questions.count|pluralize }}</span>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <button name="action" value="done" class="btn btn-success">Done ✓</button>
+      </form>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+    <!-- Add Question Form -->
+    <div>
+      <div class="card">
+        <h3 style="font-family:'Syne',sans-serif; font-weight:700; margin-bottom:1.2rem;">+ Add Question</h3>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <div class="form-group">
+            <label>Question Text *</label>
+            <textarea name="text" placeholder="Type your question here..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Option A *</label>
+            <input type="text" name="option_a" placeholder="First option" required>
+          </div>
+          <div class="form-group">
+            <label>Option B *</label>
+            <input type="text" name="option_b" placeholder="Second option" required>
+          </div>
+          <div class="form-group">
+            <label>Option C *</label>
+            <input type="text" name="option_c" placeholder="Third option" required>
+          </div>
+          <div class="form-group">
+            <label>Option D *</label>
+            <input type="text" name="option_d" placeholder="Fourth option" required>
+          </div>
+          <div class="form-group">
+            <label>✅ Correct Answer *</label>
+            <select name="correct_answer" required>
+              <option value="">— Select —</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Add Question →</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Question List -->
+    <div>
+      <h3 style="font-family:'Syne',sans-serif; font-weight:700; margin-bottom:1rem;">Questions Added</h3>
+      {% if questions %}
+        {% for q in questions %}
+        <div class="card" style="margin-bottom:0.75rem;">
+          <div class="flex items-center justify-between" style="margin-bottom:0.6rem;">
+            <span class="badge badge-yellow mono">Q{{ q.order }}</span>
+            <form method="post" style="display:inline;" onsubmit="return confirm('Delete this question?')">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="question_id" value="{{ q.id }}">
+              <button type="submit" class="btn btn-danger btn-sm">✕</button>
+            </form>
+          </div>
+          <p style="font-size:0.9rem; margin-bottom:0.7rem;">{{ q.text }}</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem;">
+            {% for key, text in q|options_list %}
+            <div style="padding:0.3rem 0.6rem; border-radius:6px; font-size:0.8rem;
+              {% if key == q.correct_answer %}background:rgba(74,240,160,0.12); color:var(--accent2); border:1px solid rgba(74,240,160,0.2);
+              {% else %}background:var(--surface2); color:var(--muted);{% endif %}">
+              <span class="mono" style="font-weight:600;">{{ key }}.</span> {{ text }}
+              {% if key == q.correct_answer %} ✓{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="card" style="text-align:center; padding:2rem; color:var(--muted);">
+          <div style="font-size:2rem; margin-bottom:0.5rem;">🤔</div>
+          No questions yet. Add your first one!
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

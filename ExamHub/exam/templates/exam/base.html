@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}MillersExamHub{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e27;
+    --border: #252a36;
+    --accent: #f0c040;
+    --accent2: #4af0a0;
+    --danger: #f05060;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --radius: 12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 20% 10%, #1a2040 0%, transparent 50%),
+                      radial-gradient(ellipse at 80% 90%, #0f1a10 0%, transparent 50%);
+  }
+  nav {
+    background: rgba(13,15,20,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  .nav-brand span { color: var(--text); }
+  .nav-links { display: flex; gap: 0.5rem; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--surface2); }
+  .nav-links a.active { color: var(--accent); background: rgba(240,192,64,0.08); }
+  .container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .container-wide { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-hover { transition: border-color 0.2s, transform 0.2s; }
+  .card-hover:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #111; }
+  .btn-primary:hover { background: #ffd060; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .btn-danger { background: rgba(240,80,96,0.12); color: var(--danger); border: 1px solid rgba(240,80,96,0.2); }
+  .btn-danger:hover { background: rgba(240,80,96,0.2); }
+  .btn-success { background: rgba(74,240,160,0.12); color: var(--accent2); border: 1px solid rgba(74,240,160,0.2); }
+  .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
+
+  /* Forms */
+  .form-group { margin-bottom: 1.1rem; }
+  label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-bottom: 0.4rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { min-height: 80px; resize: vertical; }
+  select option { background: var(--surface2); }
+
+  /* Messages */
+  .messages { margin-bottom: 1.5rem; }
+  .message {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .message.success { background: rgba(74,240,160,0.1); color: var(--accent2); border: 1px solid rgba(74,240,160,0.2); }
+  .message.error { background: rgba(240,80,96,0.1); color: var(--danger); border: 1px solid rgba(240,80,96,0.2); }
+
+  /* Page header */
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-size: 0.9rem; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .badge-yellow { background: rgba(240,192,64,0.15); color: var(--accent); }
+  .badge-green { background: rgba(74,240,160,0.15); color: var(--accent2); }
+  .badge-red { background: rgba(240,80,96,0.15); color: var(--danger); }
+  .badge-gray { background: var(--surface2); color: var(--muted); }
+
+  /* Grade display */
+  .grade-badge {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 4rem;
+    line-height: 1;
+  }
+  .grade-A { color: #4af0a0; }
+  .grade-B { color: #4ab0f0; }
+  .grade-C { color: #f0c040; }
+  .grade-D { color: #f09040; }
+  .grade-E { color: #f06040; }
+  .grade-F { color: #f05060; }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+  
+  /* Flex utils */
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .gap-2 { gap: 0.5rem; }
+  .gap-3 { gap: 0.75rem; }
+  .mt-1 { margin-top: 0.25rem; }
+  .mt-2 { margin-top: 0.5rem; }
+  .mt-3 { margin-top: 0.75rem; }
+  .mb-3 { margin-bottom: 0.75rem; }
+  .text-muted { color: var(--muted); }
+  .text-sm { font-size: 0.85rem; }
+  .mono { font-family: 'DM Mono', monospace; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .fadein { animation: fadeIn 0.3s ease both; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="{% url 'home' %}" class="nav-brand">MillersExam<span>Hub</span></a>
+  <div class="nav-links">
+    <a href="{% url 'home' %}">Take Exam</a>
+    <a href="{% url 'manage_exams' %}">Manage</a>
+      <a href="{% url 'profile' %}">👤</a>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="container" style="padding-bottom:0;">
+  <div class="messages">
+    {% for message in messages %}
+      <div class="message {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+</body>
+</html>
