@@ -24,13 +24,21 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 _vercel_host = os.environ.get('VERCEL_URL', '')
 _extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    ".vercel.app",
+]
 if _vercel_host:
     ALLOWED_HOSTS.append(_vercel_host)
 if _extra_hosts:
     ALLOWED_HOSTS += [h.strip() for h in _extra_hosts.split(',') if h.strip()]
 
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "https://*.vercel.app",
+]
 if _vercel_host:
     CSRF_TRUSTED_ORIGINS.append(f'https://{_vercel_host}')
 if _extra_hosts:
