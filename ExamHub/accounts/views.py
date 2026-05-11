@@ -10,6 +10,21 @@ from exam.models import ExamAttempt, Exam, Question, StudentAnswer
 
 
 # Create your views here.
+
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+
+def create_admin(request):
+    if User.objects.filter(username="admin").exists():
+        return JsonResponse({"status": "already exists"})
+
+    User.objects.create_superuser(
+        username="admin",
+        email="admin@example.com",
+        password="admin12345"
+    )
+    return JsonResponse({"status": "created"})
+    
 def login_user(request):
     if request.method == 'POST':
         username = request.POST.get('username')
