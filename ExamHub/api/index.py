@@ -1,12 +1,8 @@
-"""
-Vercel serverless entry point.
-This file must live at api/index.py in your project root.
-"""
 import os
-import django
 from django.core.wsgi import get_wsgi_application
+from django.core.management import call_command
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'examsite.settings')
-django.setup()
 
 app = get_wsgi_application()
+call_command('migrate', '--run-syncdb')
