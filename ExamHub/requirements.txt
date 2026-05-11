@@ -1,0 +1,17 @@
+# Core
+Django>=4.2,<5.0
+
+# PostgreSQL driver (for Neon or any Postgres)
+psycopg2-binary==2.9.9
+
+# Database URL parser
+dj-database-url==2.1.0
+
+# Static files
+whitenoise==6.6.0
+
+# Environment variables (local dev only)
+python-dotenv==1.0.0
+
+# Image handling (profile pictures / ImageField)
+Pillow==10.3.0
