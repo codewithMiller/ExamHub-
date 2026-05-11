@@ -1,0 +1,245 @@
+{% extends 'exam/base.html' %}
+
+{% block content %}
+<header class="bg-dark py-5" style="background: linear-gradient(135deg, #1f1f1f, #343a40);">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder" style="letter-spacing: 2px;">
+                Welcome, {{ user.username }}
+            </h1>
+            <p class="text-white-50">Manage your account</p>
+        </div>
+    </div>
+</header>
+
+<div class="container my-5">
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert-success">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+
+        <!-- SIDEBAR -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow" style="background:#2b2b2b; border-radius:15px;">
+                <div class="card-body p-4">
+
+                    <!-- Profile Picture -->
+                    <div class="text-center mb-4">
+                        {% if profile.profile_picture %}
+                            <img src="{{ profile.profile_picture.url }}" class="rounded-circle mb-2"
+                                 style="width:80px; height:80px; object-fit:cover; border:2px solid #6f42c1;">
+                        {% else %}
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                 style="width:80px; height:80px; background:#1f1f1f; border:2px solid #6f42c1; font-size:2rem; color:#d63384;">
+                                {{ user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <p class="text-white mb-0 small">{{ user.username }}</p>
+                        <p class="text-white-50" style="font-size:0.75rem;">{{ user.email }}</p>
+                    </div>
+
+                    <p class="text-white-50 small mb-2" style="letter-spacing:1px;">MY ACCOUNT</p>
+                    <ul class="list-unstyled mb-4">
+                        <li><a href="?section=profile" class="sidebar-link">Profile</a></li>
+                        <li><a href="?section=history" class="sidebar-link">Exam History</a></li>
+                        <li><a href="?section=my_exams" class="sidebar-link">My Exams</a></li>
+                    </ul>
+
+                    <p class="text-white-50 small mb-2" style="letter-spacing:1px;">SETTINGS</p>
+                    <ul class="list-unstyled">
+                        <li><a href="?section=password" class="sidebar-link">Password & Security</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="col-md-9">
+            <div class="card border-0 shadow" style="background:#2b2b2b; border-radius:15px;">
+                <div class="card-body p-5">
+
+                    {% if section == "profile" %}
+                        <h4 class="text-white mb-4">Profile</h4>
+                        <div class="row g-3">
+                            <div class="col-6"><div class="info-box"><span class="label">Username</span>{{ user.username }}</div></div>
+                            <div class="col-6"><div class="info-box"><span class="label">First Name</span>{{ user.first_name|default:"—" }}</div></div>
+                            <div class="col-6"><div class="info-box"><span class="label">Last Name</span>{{ user.last_name|default:"—" }}</div></div>
+                            <div class="col-6"><div class="info-box"><span class="label">Email</span>{{ user.email }}</div></div>
+                            <div class="col-12"><div class="info-box"><span class="label">Bio</span>{{ profile.bio|default:"No bio yet." }}</div></div>
+                        </div>
+                        <a href="?section=update_profile" class="btn mt-4"
+                           style="background:linear-gradient(135deg,#6f42c1,#d63384); border:none; border-radius:12px; color:#fff; padding:10px 25px;">
+                            Edit Profile
+                        </a>
+
+                    {% elif section == "update_profile" %}
+                        <h4 class="text-white mb-4">Edit Profile</h4>
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="update_profile">
+                            <div class="row g-3">
+                                {% for field in user_form %}
+                                <div class="col-md-6">
+                                    {{ field }}
+                                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                {% endfor %}
+                                {% for field in picture_form %}
+                                <div class="col-12">
+                                    <label class="text-white-50 small">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-4 d-flex gap-3">
+                                <button type="submit" class="btn"
+                                        style="background:linear-gradient(135deg,#6f42c1,#d63384); border:none; border-radius:12px; color:#fff; padding:10px 25px;">
+                                    Save Changes
+                                </button>
+                                <a href="?section=profile" class="btn" style="border:1px solid #444; border-radius:12px; color:#fff; padding:10px 25px;">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+
+                    {% elif section == "history" %}
+                        <h4 class="text-white mb-4">Exam History</h4>
+                        {% if attempts %}
+                            {% for attempt in attempts %}
+                            <div class="card mb-3 border-0" style="background:#1f1f1f; border-radius:12px;">
+                                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-white mb-1 fw-bold">{{ attempt.exam.title }}</p>
+                                        <p class="text-white-50 small mb-0">{{ attempt.submitted_at|date:"M d, Y" }}</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="fs-4 fw-bold" style="color:
+                                            {% if attempt.grade == 'A' %}#4af0a0
+                                            {% elif attempt.grade == 'F' %}#d63384
+                                            {% else %}#f0c040{% endif %};">
+                                            {{ attempt.grade }}
+                                        </span>
+                                        <p class="text-white-50 small mb-0">{{ attempt.score }}/{{ attempt.total }} · {{ attempt.percentage }}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-white-50">You haven't taken any exams yet.</p>
+                        {% endif %}
+
+                    {% elif section == "my_exams" %}
+                        <h4 class="text-white mb-4">Exams I Created</h4>
+                        {% if created_exams %}
+                            {% for exam in created_exams %}
+                            <div class="card mb-3 border-0" style="background:#1f1f1f; border-radius:12px;">
+                                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-white mb-1 fw-bold">{{ exam.title }}</p>
+                                        <p class="text-white-50 small mb-0">{{ exam.questions.count }} questions · {{ exam.duration_minutes }} mins</p>
+                                    </div>
+                                    <a href="{% url 'add_question' exam.id %}" class="btn btn-sm"
+                                       style="border:1px solid #6f42c1; border-radius:8px; color:#fff; padding:6px 16px;">
+                                        Manage
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-white-50">You haven't created any exams yet.</p>
+                        {% endif %}
+
+                    {% elif section == "password" %}
+                        <h4 class="text-white mb-4">Password & Security</h4>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="password">
+                            <div class="row g-3">
+                                {% for field in password_form %}
+                                <div class="col-md-6">
+                                    {{ field }}
+                                    {% if field.help_text %}<div class="text-white-50 small mt-1">{{ field.help_text|safe }}</div>{% endif %}
+                                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-4 d-flex gap-3">
+                                <button type="submit" class="btn"
+                                        style="background:linear-gradient(135deg,#6f42c1,#d63384); border:none; border-radius:12px; color:#fff; padding:10px 25px;">
+                                    Change Password
+                                </button>
+                                <a href="?section=profile" class="btn" style="border:1px solid #444; border-radius:12px; color:#fff; padding:10px 25px;">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+
+                    {% else %}
+                        <h4 class="text-white mb-2">Dashboard</h4>
+                        <p class="text-white-50">Select an option from the sidebar.</p>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- LOGOUT -->
+            <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn"
+                   style="border:1px solid #444; border-radius:12px; color:#fff; padding:10px 30px;">
+                    Logout
+                </button>
+            </div>
+            </form>
+            
+        </div>
+
+    </div>
+</div>
+
+<style>
+.sidebar-link {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.9rem;
+}
+.sidebar-link:hover { color: #fff; }
+.info-box {
+    background: #1f1f1f;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    font-size: 0.9rem;
+}
+.label {
+    display: block;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem;
+}
+.profile-input {
+    width: 100%;
+    background: #1f1f1f;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+}
+.profile-input:focus {
+    outline: none;
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 1px rgba(111,66,193,0.4);
+}
+</style>
+{% endblock %}
