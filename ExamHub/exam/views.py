@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Exam, Question, ExamAttempt, StudentAnswer
@@ -109,20 +110,22 @@ def add_question(request, exam_id):
 
 def take_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id, is_active=True)
-    questions = exam.questions.all()
+    questions = list(exam.questions.all())  # ← convert to list so shuffle works
 
-    if not questions.exists():
+    if not questions:
         messages.error(request, 'This exam has no questions yet.')
         return redirect('home')
+
+    random.shuffle(questions)  # ← shuffle every single time, GET or POST
 
     if request.method == 'POST':
         student_name = request.POST.get('student_name', '').strip() or 'Anonymous'
         attempt = ExamAttempt.objects.create(
-    exam=exam,
-    student=request.user if request.user.is_authenticated else None,
-    student_name=request.user.username if request.user.is_authenticated else student_name,
-    total=questions.count()
-)
+            exam=exam,
+            student=request.user if request.user.is_authenticated else None,
+            student_name=request.user.username if request.user.is_authenticated else student_name,
+            total=len(questions)
+        )
         score = 0
         results = []
 
@@ -144,7 +147,8 @@ def take_exam(request, exam_id):
                 'correct_text': q.correct_option_text(),
             })
 
-        pct = (score / questions.count()) * 100 if questions.count() else 0
+        total = len(questions)
+        pct = (score / total) * 100 if total else 0
         grade = get_grade(pct)
         attempt.score = score
         attempt.percentage = round(pct, 1)
@@ -155,7 +159,7 @@ def take_exam(request, exam_id):
             'attempt': attempt,
             'results': results,
             'score': score,
-            'total': questions.count(),
+            'total': total,
             'percentage': round(pct, 1),
             'grade': grade,
             'exam': exam,
@@ -165,8 +169,6 @@ def take_exam(request, exam_id):
         'exam': exam,
         'questions': questions,
     })
-
-
 # ── Leaderboard ───────────────────────────────────────────────────────────────
 @login_required
 def leaderboard(request, exam_id):
