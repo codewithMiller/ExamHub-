@@ -173,5 +173,5 @@ def take_exam(request, exam_id):
 @login_required
 def leaderboard(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
-    attempts = exam.attempts.order_by('-percentage', 'submitted_at')[:20]
+    attempts = exam.attempts.order_by('-percentage', 'submitted_at')[:50]
     return render(request, 'exam/leaderboard.html', {'exam': exam, 'attempts': attempts})
