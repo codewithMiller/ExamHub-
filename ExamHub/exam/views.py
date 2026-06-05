@@ -110,13 +110,13 @@ def add_question(request, exam_id):
 
 def take_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id, is_active=True)
-    questions = list(exam.questions.all())  # ← convert to list so shuffle works
+    questions = list(exam.questions.all())  #convert to list
 
     if not questions:
         messages.error(request, 'This exam has no questions yet.')
         return redirect('home')
 
-    random.shuffle(questions)  # ← shuffle every single time, GET or POST
+    random.shuffle(questions)  #shuffle
 
     if request.method == 'POST':
         student_name = request.POST.get('student_name', '').strip() or 'Anonymous'
@@ -173,5 +173,5 @@ def take_exam(request, exam_id):
 @login_required
 def leaderboard(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
-    attempts = exam.attempts.order_by('-percentage', 'submitted_at')[:50]
+    attempts = exam.attempts.order_by('-percentage', 'submitted_at')[:100]
     return render(request, 'exam/leaderboard.html', {'exam': exam, 'attempts': attempts})
