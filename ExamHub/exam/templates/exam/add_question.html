@@ -16,7 +16,13 @@
       </form>
     </div>
   </div>
-
+  <form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="edit_duration">
+  <label>Duration (minutes)</label>
+  <input type="number" name="duration" value="{{ exam.duration_minutes }}" min="1" required>
+  <button type="submit" class="btn btn-success">Update Duration</button>
+  </form>
   <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
     <!-- Add Question Form -->
     <div>
