@@ -66,8 +66,17 @@ def add_question(request, exam_id):
 
     if request.method == 'POST':
         action = request.POST.get('action')
+        if action == 'edit_duration':
+            new_duration = request.POST.get('duration', '').strip()
+            if new_duration.isdigit() and int(new_duration) > 0:
+                exam.duration_minutes = int(new_duration)
+                exam.save()
+                messages.success(request, f'Duration updated to {new_duration} minutes.')
+            else:
+              messages.error(request, 'Enter a valid duration (positive number).')
+              return redirect('add_question', exam_id=exam.id)
 
-        if action == 'add':
+        elif action == 'add':
             text = request.POST.get('text', '').strip()
             opt_a = request.POST.get('option_a', '').strip()
             opt_b = request.POST.get('option_b', '').strip()
