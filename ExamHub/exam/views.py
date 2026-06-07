@@ -102,19 +102,51 @@ def add_question(request, exam_id):
         elif action == 'delete':
             q_id = request.POST.get('question_id')
             Question.objects.filter(id=q_id, exam=exam).delete()
-            # Re-number
             for i, q in enumerate(exam.questions.all(), 1):
                 q.order = i
                 q.save()
             messages.success(request, 'Question deleted.')
             return redirect('add_question', exam_id=exam.id)
 
+        elif action == 'edit_question':
+            q_id = request.POST.get('question_id')
+            question = get_object_or_404(Question, id=q_id, exam=exam)
+            text = request.POST.get('text', '').strip()
+            opt_a = request.POST.get('option_a', '').strip()
+            opt_b = request.POST.get('option_b', '').strip()
+            opt_c = request.POST.get('option_c', '').strip()
+            opt_d = request.POST.get('option_d', '').strip()
+            correct = request.POST.get('correct_answer', '').strip().upper()
+
+            if not all([text, opt_a, opt_b, opt_c, opt_d, correct]):
+                messages.error(request, 'All fields are required.')
+            elif correct not in ['A', 'B', 'C', 'D']:
+                messages.error(request, 'Correct answer must be A, B, C, or D.')
+            else:
+                question.text = text
+                question.option_a = opt_a
+                question.option_b = opt_b
+                question.option_c = opt_c
+                question.option_d = opt_d
+                question.correct_answer = correct
+                question.save()
+                messages.success(request, 'Question updated!')
+                return redirect('add_question', exam_id=exam.id)
+
         elif action == 'done':
             return redirect('manage_exams')
 
-    return render(request, 'exam/add_question.html', {'exam': exam, 'questions': questions})
+    # GET edit mode
+    editing_question = None
+    edit_id = request.GET.get('edit_id')
+    if edit_id:
+        editing_question = get_object_or_404(Question, id=edit_id, exam=exam)
 
-
+    return render(request, 'exam/add_question.html', {
+        'exam': exam,
+        'questions': questions,
+        'editing_question': editing_question,
+    })
 # ── Take Exam ─────────────────────────────────────────────────────────────────
 
 def take_exam(request, exam_id):
