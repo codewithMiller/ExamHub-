@@ -16,53 +16,100 @@
       </form>
     </div>
   </div>
+
   <form method="post">
-  {% csrf_token %}
-  <input type="hidden" name="action" value="edit_duration">
-  <label>Duration (minutes)</label>
-  <input type="number" name="duration" value="{{ exam.duration_minutes }}" min="1" required>
-  <button type="submit" class="btn btn-success">Update Duration</button>
+    {% csrf_token %}
+    <input type="hidden" name="action" value="edit_duration">
+    <label>Duration (minutes)</label>
+    <input type="number" name="duration" value="{{ exam.duration_minutes }}" min="1" required>
+    <button type="submit" class="btn btn-success">Update Duration</button>
   </form>
+
   <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
-    <!-- Add Question Form -->
+
+    <!-- Add / Edit Question Form -->
     <div>
       <div class="card">
-        <h3 style="font-family:'Syne',sans-serif; font-weight:700; margin-bottom:1.2rem;">+ Add Question</h3>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="add">
-          <div class="form-group">
-            <label>Question Text *</label>
-            <textarea name="text" placeholder="Type your question here..." required></textarea>
-          </div>
-          <div class="form-group">
-            <label>Option A *</label>
-            <input type="text" name="option_a" placeholder="First option" required>
-          </div>
-          <div class="form-group">
-            <label>Option B *</label>
-            <input type="text" name="option_b" placeholder="Second option" required>
-          </div>
-          <div class="form-group">
-            <label>Option C *</label>
-            <input type="text" name="option_c" placeholder="Third option" required>
-          </div>
-          <div class="form-group">
-            <label>Option D *</label>
-            <input type="text" name="option_d" placeholder="Fourth option" required>
-          </div>
-          <div class="form-group">
-            <label>✅ Correct Answer *</label>
-            <select name="correct_answer" required>
-              <option value="">— Select —</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;">Add Question →</button>
-        </form>
+        {% if editing_question %}
+          <h3 style="font-family:'Syne',sans-serif; font-weight:700; margin-bottom:1.2rem;">✏️ Edit Question {{ editing_question.order }}</h3>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit_question">
+            <input type="hidden" name="question_id" value="{{ editing_question.id }}">
+            <div class="form-group">
+              <label>Question Text *</label>
+              <textarea name="text" required>{{ editing_question.text }}</textarea>
+            </div>
+            <div class="form-group">
+              <label>Option A *</label>
+              <input type="text" name="option_a" value="{{ editing_question.option_a }}" required>
+            </div>
+            <div class="form-group">
+              <label>Option B *</label>
+              <input type="text" name="option_b" value="{{ editing_question.option_b }}" required>
+            </div>
+            <div class="form-group">
+              <label>Option C *</label>
+              <input type="text" name="option_c" value="{{ editing_question.option_c }}" required>
+            </div>
+            <div class="form-group">
+              <label>Option D *</label>
+              <input type="text" name="option_d" value="{{ editing_question.option_d }}" required>
+            </div>
+            <div class="form-group">
+              <label>✅ Correct Answer *</label>
+              <select name="correct_answer" required>
+                <option value="">— Select —</option>
+                <option value="A" {% if editing_question.correct_answer == 'A' %}selected{% endif %}>A</option>
+                <option value="B" {% if editing_question.correct_answer == 'B' %}selected{% endif %}>B</option>
+                <option value="C" {% if editing_question.correct_answer == 'C' %}selected{% endif %}>C</option>
+                <option value="D" {% if editing_question.correct_answer == 'D' %}selected{% endif %}>D</option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes ✓</button>
+              <a href="{% url 'add_question' exam.id %}" class="btn btn-danger" style="flex:1; text-align:center;">Cancel</a>
+            </div>
+          </form>
+
+        {% else %}
+          <h3 style="font-family:'Syne',sans-serif; font-weight:700; margin-bottom:1.2rem;">+ Add Question</h3>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <div class="form-group">
+              <label>Question Text *</label>
+              <textarea name="text" placeholder="Type your question here..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label>Option A *</label>
+              <input type="text" name="option_a" placeholder="First option" required>
+            </div>
+            <div class="form-group">
+              <label>Option B *</label>
+              <input type="text" name="option_b" placeholder="Second option" required>
+            </div>
+            <div class="form-group">
+              <label>Option C *</label>
+              <input type="text" name="option_c" placeholder="Third option" required>
+            </div>
+            <div class="form-group">
+              <label>Option D *</label>
+              <input type="text" name="option_d" placeholder="Fourth option" required>
+            </div>
+            <div class="form-group">
+              <label>✅ Correct Answer *</label>
+              <select name="correct_answer" required>
+                <option value="">— Select —</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Add Question →</button>
+          </form>
+        {% endif %}
       </div>
     </div>
 
@@ -71,15 +118,18 @@
       <h3 style="font-family:'Syne',sans-serif; font-weight:700; margin-bottom:1rem;">Questions Added</h3>
       {% if questions %}
         {% for q in questions %}
-        <div class="card" style="margin-bottom:0.75rem;">
+        <div class="card" style="margin-bottom:0.75rem; {% if editing_question.id == q.id %}border:1px solid var(--accent);{% endif %}">
           <div class="flex items-center justify-between" style="margin-bottom:0.6rem;">
             <span class="badge badge-yellow mono">Q{{ q.order }}</span>
-            <form method="post" style="display:inline;" onsubmit="return confirm('Delete this question?')">
-              {% csrf_token %}
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="question_id" value="{{ q.id }}">
-              <button type="submit" class="btn btn-danger btn-sm">✕</button>
-            </form>
+            <div class="flex gap-2">
+              <a href="{% url 'add_question' exam.id %}?edit_id={{ q.id }}" class="btn btn-sm" style="background:var(--surface2);">✏️</a>
+              <form method="post" style="display:inline;" onsubmit="return confirm('Delete this question?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="question_id" value="{{ q.id }}">
+                <button type="submit" class="btn btn-danger btn-sm">✕</button>
+              </form>
+            </div>
           </div>
           <p style="font-size:0.9rem; margin-bottom:0.7rem;">{{ q.text }}</p>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem;">
@@ -101,6 +151,7 @@
         </div>
       {% endif %}
     </div>
+
   </div>
 </div>
 {% endblock %}
